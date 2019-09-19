@@ -1,6 +1,7 @@
-title: Your awesome title
+title: The Bash Junkie
 description: >
-  Some description
+  Short posts on bash scripting.
+  Because there is always something more to learn.
 
 markdown: kramdown
 theme: jekyll-theme-modernist

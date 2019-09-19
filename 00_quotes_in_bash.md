@@ -1,10 +1,16 @@
+---
+layout: default
+---
+
 # Quoting variables in bash
 
 `bash --version`: GNU bash, version 4.3.48(1)-release (x86_64-pc-linux-gnu)
+
 Your name?: Linux ubuntu-xenial 4.4.0-164-generic #192-Ubuntu SMP Fri Sep 13
 12:02:50 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
 
 Arcana check DC: 15
+
 Recommended doses of coffee:
 
 Bash variables can be tricky, their behaviour is not the same as variables in

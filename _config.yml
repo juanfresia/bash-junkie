@@ -4,5 +4,5 @@ description: >
   Because there is always something more to learn.
 
 markdown: kramdown
-theme: jekyll-theme-modernist
+theme: minima
 

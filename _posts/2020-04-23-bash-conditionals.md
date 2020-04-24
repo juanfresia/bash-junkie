@@ -2,7 +2,6 @@
 layout: post
 title: 'Bash conditionals'
 date: '2020-04-23 23:25:00 -0300'
-categories: bash
 ---
 
 > `bash --version`: GNU bash, version 4.3.48(1)-release (x86_64-pc-linux-gnu)

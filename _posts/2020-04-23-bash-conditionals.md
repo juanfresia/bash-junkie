@@ -4,30 +4,42 @@ title: 'Bash conditionals'
 date: '2020-04-23 23:25:00 -0300'
 ---
 
-> `bash --version`: GNU bash, version 4.3.48(1)-release (x86_64-pc-linux-gnu)
+`bash --version`: GNU bash, version 4.3.48(1)-release (x86_64-pc-linux-gnu)  
+`INT (Arcana)`: DC 12  
+`QOTD`:
+> Conditionals.  
+> You know, the _if... then... else_ stuff.  
+> Bash have them too!
 
-Conditionals.  
-You know, the _if... then... else_ stuff.  
-Bash have them too!
+## Bash has conditionals
 
 Today I explored the lands of bash conditionals. Like most things in bash,
 they are usually used "by recipe", without ever understanding how they really
 work.
-_"Of course I know how it works"_, I hear you say, _"I know conditionals!". And that is fair, anyone familiarized with programming languages (or even english!) understands the basic structure of a conditional.
 
-However, conditionals in most programming languages have a very definite structure:
+_"Of course I know how it works"_, I hear you say, _"I know conditionals!"_.
+And that is fair, anyone familiarized with a programming languages (or even
+English!) understands the basic structure of a conditional.
+
+However, conditionals in most programming languages have a very **defined structure**:
 
 ```
-if <expression> then
+if <condition> then
     <do stuff>
 else
     <do another stuff>
 end
 ```
 
-We _understand_ that the condition that defines the way the execution flows has to be a boolean proposition, which means it has to evaluate to either be true or false. We can put there a comparison between variables, a boolean value, a call to a method that returns a value.
+We _understand_ that the "condition" that defines how the execution flows
+has to be a boolean proposition, which means it has to evaluate to either be
+true or false. We can put there a comparison between variables, a boolean
+value, a call to a method that returns such as value.
 
-In bash however we don't really have variables. Not in the same way as other languages anyway. Bash works around **commands**. We cant just simply equal two variables as part of the expression and call it a day.
+In bash however we don't really have variables. Not in the same way as most
+languages. We cant just simply equal two variables as part of the expression
+and call it a day: bash is instead based around **commands**. Let's look at
+an example, a first attempt to use bash conditional.
 
 ```bash
 $ cat conditionals-1
@@ -42,7 +54,10 @@ $ ./conditionals-1
 ./conditionals-1: line 5: 1: command not found
 ```
 
-So, no matter how hard we try to fit bash conditionals into our standard model we cannot seem to have it to work. The `command not found` error is a little bit off-putting too.
+Hmmm... it did not work. How bad is that? No matter how hard we try to fit
+bash into our standard model for conditionals we cannot seem to have it to
+work. The `command not found` error somehow makes matters a little bit more
+off-putting. Here are some more failed attempts.
 
 ```bash
 $ export foo=1
@@ -54,7 +69,8 @@ $ if ( "$foo" == "1" ); then echo hi; fi
 1: command not found
 ```
 
-So we do what we all do, we search for a solution, find the magic of the _double brackets_ and are done with it.
+So we do what we all do: we search for a solution online and find the magic
+of the _double brackets_ `[[]]`. We are done with it...
 
 ```bash
 $ cat conditionals-1-revisited
@@ -69,19 +85,42 @@ $ ./conditionals-1-revisited
 hi
 ```
 
-But... what did actually change? It must be bash weird syntax, I said to myself the first time I saw it. But then later on you see that replacing the double brackets with simple brackets also works. Less characters, brilliant!
+...or are we?
 
-Then you see some people doing the same thing you do, exactly the same... but for some reason they changed the `==` for a `-eq`. Weird right? It also works.
-
-At that point its all good, until you stumble upon other "formats" of bash conditionals and if you are me, you start asking questions. How does this thing _really_ work?
+What did actually change? It must be bash weird syntax, I said to myself the
+first time I saw it. But then later on you see that replacing the double
+brackets with simple brackets also works. Less characters, brilliant!
 
 ```bash
+if [ $foo == "1" ]; then echo hi; fi
+fi
+```
+
+Then you see some people doing the same thing you do, exactly the same...
+except that for some reason they changed the `==` for a `-eq`. Weird right? I
+mean, that it also works. So many ways to do the same thing.
+
+```bash
+if [ $foo -eq "1" ]; then echo hi; fi
+fi
+```
+
+At that point its all good, until you stumble upon other "formats" of bash
+conditionals and if you are me, you start asking questions. How does this
+thing _really_ work?
+
+```bash
+if test $foo -eq 1; then
+  echo hi
+fi
+
 if mountpoint /var/log; then
   <do stuff if /var/log is actually a mountpoint, duh!>
 fi
 ```
 
-Of course, it is enough to see a couple of examples to get a feeling on what works and what doesn't.
+Of course, it is enough to see a couple of examples to get a feeling on what
+works and what doesn't. But sometimes is not all that clear.
 
 ## Everything is a command
 

@@ -2,6 +2,7 @@ title: The Bash Junkie
 description: >
   Short posts on bash scripting.
   Because there is always something more to learn.
+url: juanfresia.github.com
 
 markdown: kramdown
 theme: minima

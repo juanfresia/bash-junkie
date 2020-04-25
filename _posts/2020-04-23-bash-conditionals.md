@@ -347,11 +347,136 @@ You can still use the _coreutils_ version specifying the full path.
 
 ## The improved "test command"
 
-So, we've come a long way already.
+So, we've come a long way already. We now understand most of bash conditional
+expressions, but there is one thing left: the double brackets `[[]]`.
+
+At this point I though just what you are thinking: _they must be another command
+that was promoted to builtin_. In a way that is right, but technically it's wrong.
+Let me explain what I mean.
+
+Double brackets are a _first class citizens_ among bash syntax: `[[` is not a command, it is not a _builtin_ but it is a _keyword_. As such it has a special meaning inside bash, and has it's own rule for parsing.
+
+> You can use the `type` builtin to check how bash will interpret a particular string:
+> ```bash
+> $ type [[
+> [[ is a shell keyword
+> $ type [
+> [ is a shell builtin
+> $ type test
+> test is a shell builtin
+> ```
+> This has no practical use at all, but its a nice thing to know, right?
+
+Bash interprets expressions starting with `[[` as _compound commands_. You
+can get all the details in the manual pages, but in short it means that
+patters with the format `[[ EXPRESSION ]]` are parsed as a whole unit by Bash
+itself: it just takes the whole thing, evaluates it as a compound command and
+makes it return a value depending on the result of the evaluation.
+
+```bash
+[[ expression ]]
+      Return a status of 0 or 1 depending on the evaluation of the
+      conditional expression expression.
+```
+
+So, now we should ask... what are the rules for that evaluation?
+
+Well, the rules are called _conditional expressions_ and are roughly the same
+as the ones that we already covered for `test` and `[` builtins. This means
+the format of what goes inside can be the same as those commands. Whoa, that
+was exciting. Where is the catch? Why not add another alias to the `test`
+command, why do even care?
+
+### The power of the parser
+
+Yes, the general flavor and format of the conditional expression `[[`
+supports is almost cloned from it's predecessors. Mostly to avoid driving
+shell script programmers a new way of doing their ifs. That's not the interesting
+part of this.
+
+Having `[[` integrated so deeply in bash shell as to become part of it's very own
+syntax means a couple of things:
+
+We are no longer tied to the `command` format (which is also followed by
+builtins). Characters with special meaning inside a command (such as `|` or
+`&&`) had to be escaped to be used within a command. Ever wondered why the
+`-a` to _and_ two conditions? 
+
+Now that we can use `&&` and `||` for logical operations, `-a` and `-o` are
+no longer supported. We can also use parenthesis for grouping and other
+operators (like `<`) that previously needed escaping for having special
+meaning inside a command.
+
+Another key difference is that we no longer have to worry about empty
+variables and wring substitutions. Essentially quotes are needed whenever we
+want bash to _pass the command and empty argument_ if the variable is empty
+or undefined. If we don't quote, the variable is omitted.
+
+```bash
+# Parenthesis and , sign need to be escaped
+# -a and -o as logical operators
+# Quoting is needed if variables can be empty
+[ \( "$foo" -eq 1 -a "$bar" -eq 2 \) -o 3 \< 2 ]
+
+# Quoting is not needed
+# This will work even if foo or bar are empty!
+[[ ( $foo == 1 && $bar == 2 ) || 3 < 2 ]]
+```
+
+But `[[` is a _compound command_, so it is not tied to that substitution. In
+fact, it performs substitutions in a more friendly and orderly way. This
+allow anther nice feature: _short circuiting_. With builtins this cannot be
+`done, simple because all expansions have to be performed _before_ calling
+the builtin. However, `[[` is part of the shell syntax, and it does short
+circuiting!
+
+```bash
+# Second part of the -o could be ommited given that whole expression
+# will always be true regardless
+[ 1 -eq 1 -o $(touch oops; echo 1) -eq 1 ]
+
+# Same here
+[[ 1 == 1 || $(touch oops; echo 1) == 1 ]]
+```
+
+You can try it on your own, check both of them and see if any generates the
+`oops` file. You will see that the `[[` one performs a more clever way of
+evaluating the expression, and by doing so it can short circuit when possible.
+
+Another _big_ difference lies in error handling. Remember the quirk commands
+had when dealing with errors? A command has only its exit code to output both
+the result of the comparison _and_ tell if an error happened; there is no way
+around that. But making `[[` part of shell syntax gives us more power on how
+to handle errors. Now the bash itself can halt the whole thing up if an error
+happens while traversing the _compound command_, just the same as it would
+stop a command from executing if a bad substitution happened.
+
+Take the `-d` flag, that checks if a particular file is a directory. It of
+course _always_ need a parameter (i.e. the file to check), but look what
+happens when we omit that value with `[` and with `[[`.
+
+```
+# No error, it just evaluates to false
+$ [ -d ]
+
+$ [[ -d ]]
+-bash: unexpected argument `]]' to conditional unary operator
+-bash: syntax error near `]]
+```
+
+Those are the main differences and advantages `[[` has over `[`, but there is
+one more thing worth noting. `[[` is part of bash, other shells (such as zsh)
+also understand the keyword, but they may have slightly different syntax or
+features. So _there is no standard_ for `[[`.
+
+The old `[` (and `test`) both have a subset of features that are standarized
+by POSIX, and most shells (even old ones like `[`) will have that subset for
+sure. So when writing a script that has to work with the old world, it's not
+advised to use `[[`.
 
 ## Putting it all together
 
-## Challenges :)
+### Challenges
 
 
 [1]: https://github.com/coreutils/coreutils/blob/master/src/test.c "test source code from coreutils"

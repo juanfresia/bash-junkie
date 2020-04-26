@@ -207,7 +207,7 @@ int main(int argc, char* argv[]) {
 }
 ```
 
-That's a simple silly program that takes tree arguments, checks the middle
+That's a simple silly program that takes three arguments, checks the middle
 one is `==` and then just does a `strcmp` between the other two arguments.
 Easy but powerful enough to cover our very first use case.
 

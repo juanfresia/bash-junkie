@@ -154,8 +154,8 @@ Worth noting `true` is a command that always succeeds (exit code 0), and
 > _We all have some day when we felt like unix false command:_  
 > `false - do nothing, unsuccessfully`
 
-Thit explains why the `mountpoint` conditional worked. It's just a command
-and its exit codes indicates wether or not the directory is a mountpoint,
+This explains why the `mountpoint` conditional worked. It's just a command
+and its exit codes indicates whether or not the directory is a mountpoint,
 exactly the kind of stuff our if structure wants.
 
 However, what if we want to compare the output of a program? Or if we have a
@@ -364,14 +364,16 @@ Double brackets are a _first class citizens_ among bash syntax: `[[` is not a co
 > [ is a shell builtin
 > $ type test
 > test is a shell builtin
+> $ type type
+> type is a shell builtin
 > ```
 > This has no practical use at all, but its a nice thing to know, right?
 
 Bash interprets expressions starting with `[[` as _compound commands_. You
 can get all the details in the manual pages, but in short it means that
-patters with the format `[[ EXPRESSION ]]` are parsed as a whole unit by Bash
+patters with the format `[[ EXPRESSION ]]` are parsed as a whole unit by bash
 itself: it just takes the whole thing, evaluates it as a compound command and
-makes it return a value depending on the result of the evaluation.
+makes it have an exit code depending on the result of the evaluation.
 
 ```bash
 [[ expression ]]
@@ -383,34 +385,46 @@ So, now we should ask... what are the rules for that evaluation?
 
 Well, the rules are called _conditional expressions_ and are roughly the same
 as the ones that we already covered for `test` and `[` builtins. This means
-the format of what goes inside can be the same as those commands. Whoa, that
-was exciting. Where is the catch? Why not add another alias to the `test`
-command, why do even care?
+the format of what goes inside can be the same as for those commands. That
+was exciting... Where is the catch? Why not add another alias to the `test`
+command?
 
 ### The power of the parser
 
-Yes, the general flavor and format of the conditional expression `[[`
-supports is almost cloned from it's predecessors. Mostly to avoid driving
-shell script programmers a new way of doing their ifs. That's not the interesting
-part of this.
+Yes, the general flavor and format of the compound command `[[` is almost
+cloned from it's predecessors. Mostly to avoid driving shell script
+programmers crazy with a new way of doing their ifs. _But_, the interesting
+part is in the subtle differences between _simple commands_ and _compound
+commands_
 
 Having `[[` integrated so deeply in bash shell as to become part of it's very own
-syntax means a couple of things:
+syntax means a couple of things.
 
-We are no longer tied to the `command` format (which is also followed by
-builtins). Characters with special meaning inside a command (such as `|` or
-`&&`) had to be escaped to be used within a command. Ever wondered why the
-`-a` to _and_ two conditions? 
+We are no longer tied to the _command_ syntax (which is also followed by
+builtins). You know, the good old _"sequence of blank-separated arguments and
+control operators, where the first element indicates the command to run"_.
 
-Now that we can use `&&` and `||` for logical operations, `-a` and `-o` are
-no longer supported. We can also use parenthesis for grouping and other
-operators (like `<`) that previously needed escaping for having special
-meaning inside a command.
+Characters with special meaning inside a command (such as `|`, `>` or `&&`)
+had to be escaped to be escaped in `test` and `[` in order to avoid calling
+specific features of the shell, like a redirection. Ever wondered why the
+`-a` to _and_ two conditions in `test`? Now you know why.
+
+In a _compound command_ rules change, meaning of symbols can be redefined by
+the shell. We can use `&&` and `||` for logical operations (`-a` and `-o` are
+no longer supported). We can also use parenthesis for grouping and other
+operators (like `<` for "less than") without having to escape them.
+
+> _Compound commands in bash are part of the syntax, they are able to
+> **redefine** the meaning of symbols_
 
 Another key difference is that we no longer have to worry about empty
-variables and wring substitutions. Essentially quotes are needed whenever we
-want bash to _pass the command and empty argument_ if the variable is empty
-or undefined. If we don't quote, the variable is omitted.
+variables and wrong substitutions. Essentially quotes are needed whenever we
+want bash to pass the command and _empty argument_ if the variable is empty
+or undefined. If we don't quote, the variable is omitted, as if it had never
+existed.
+
+The following example illustrates these points, and shows how the same expression
+is much more clear written with the "improved test" _compound command_.
 
 ```bash
 # Parenthesis and , sign need to be escaped
@@ -423,12 +437,12 @@ or undefined. If we don't quote, the variable is omitted.
 [[ ( $foo == 1 && $bar == 2 ) || 3 < 2 ]]
 ```
 
-But `[[` is a _compound command_, so it is not tied to that substitution. In
-fact, it performs substitutions in a more friendly and orderly way. This
+As a _compound command_, `[[` is not tied to the same rules for substitution.
+In fact, it performs substitutions in a more friendly and orderly way. This
 allow anther nice feature: _short circuiting_. With builtins this cannot be
-`done, simple because all expansions have to be performed _before_ calling
-the builtin. However, `[[` is part of the shell syntax, and it does short
-circuiting!
+done, simply because all substitution and variable expansions have to be
+performed _before_ calling the builtin. However, `[[` is part of the shell
+syntax, and it does short circuiting!
 
 ```bash
 # Second part of the -o could be ommited given that whole expression
@@ -445,15 +459,17 @@ evaluating the expression, and by doing so it can short circuit when possible.
 
 Another _big_ difference lies in error handling. Remember the quirk commands
 had when dealing with errors? A command has only its exit code to output both
-the result of the comparison _and_ tell if an error happened; there is no way
-around that. But making `[[` part of shell syntax gives us more power on how
-to handle errors. Now the bash itself can halt the whole thing up if an error
+the result of the comparison _and_ tell us if an error had happened; there is
+no way around that.
+
+Making `[[` part of shell syntax gives us more power on how
+to handle errors. Now bash itself can halt the whole thing up if an error
 happens while traversing the _compound command_, just the same as it would
 stop a command from executing if a bad substitution happened.
 
-Take the `-d` flag, that checks if a particular file is a directory. It of
-course _always_ need a parameter (i.e. the file to check), but look what
-happens when we omit that value with `[` and with `[[`.
+Take the `-d` flag, as an example. It checks if a particular file is a
+directory. Obviously, it _always_ need a parameter (i.e. the file to check),
+but look what happens when we omit that value with `[` and with `[[`.
 
 ```
 # No error, it just evaluates to false
@@ -464,19 +480,71 @@ $ [[ -d ]]
 -bash: syntax error near `]]
 ```
 
+With `[[` bash shows us an error! The error es caught at _parsing time_, and
+would have prevented the if from running, the same way a _command not found_
+or misspelling of the `then` keyword would.
+
 Those are the main differences and advantages `[[` has over `[`, but there is
 one more thing worth noting. `[[` is part of bash, other shells (such as zsh)
 also understand the keyword, but they may have slightly different syntax or
-features. So _there is no standard_ for `[[`.
+features. The point is _there is no standard_ for `[[`.
 
-The old `[` (and `test`) both have a subset of features that are standarized
-by POSIX, and most shells (even old ones like `[`) will have that subset for
-sure. So when writing a script that has to work with the old world, it's not
-advised to use `[[`.
+The old `[` (and `test`) both have a subset of features that are standardized
+by POSIX, and most shells (even old ones like `sh`) will have that subset for
+sure. And even if they don't the same standard also applies to the _commands_
+(i.e. the standalone version of `test`). For that reason, when writing a
+script that has to work with the old world, or met high compatibility
+standards,it's not advised to use `[[` and `[` is preferred.
 
 ## Putting it all together
 
-### Challenges
+Hopefully this article has given you some insight on bash conditionals, and
+you can now tell the difference between the different expressions and convert
+the same _if statement_ from one type into the other. Of course you don't
+have to know all these things by heart, but having the intuition of the
+different types will help you troubleshoot issues with them in the future.
 
+When in doubt, always refer to the `man pages`, and start dummy testing to
+get an intuition for what works and what doesn't.
+
+Finally, I'm inclined to leave some expressions that may seem counter
+intuitive at first, but try to analyze them and see if you can tell what they
+are going to evaluate to. Of course, run them later to check if you were right.
+
+Thank you for making it to the end, and happy bashing!
+
+```bash
+# Here is a compilation of some useless and counter-intuitive examples of bash
+# conditionals. The objective is to decide whether the condition evaluates to
+# "true" (exit code 0), or false (exit code 1).
+
+ 0. test "This sentence is false"
+ 1. [ false ]
+ 2. [[ false ]]
+ 3. [ true; ]
+ 4. [[ true; ]]
+ 5. [ $(true) ]
+ 6. [[ $(false) ]]
+ 7. [[ $(true) ]]
+ 8. [[ $(echo false) ]]
+ 9. [[ $(echo false && false) ]]
+10. $(echo false)
+11. $(echo false && false)
+12. $(echo true)
+13. $(echo true && true)
+14. $(echo false && true)
+15. $(echo hi && true)
+16. $(echo true) && false
+17. [[ $(test a = a) || $(test b = b) ]]
+18. $([[ a == a ]])
+19. false | true
+
+# Solution
+MC4gdHJ1ZQoxLiB0cnVlCjIuIHRydWUKMy4gZXJyb3IsIHRoZSAnOycgYnJlYWtzIHRoZSB0ZXN0
+IGNvbW1hbmQKNC4gZXJyb3IsIHRoZSAnOycgYnJlYWtzIHRoZSBjb21wb3VuZCBjb21tYW5kCjUu
+IGZhbHNlCjYuIGZhbHNlCjcuIGZhbHNlCjguIHRydWUKOS4gdHJ1ZQoxMC4gZmFsc2UKMTEuIGZh
+bHNlCjEyLiB0cnVlCjEzLiB0cnVlCjE0LiBmYWxzZQoxNS4gQ29tbWFuZCAnaGknIG5vdCBmb3Vu
+ZAoxNi4gZmFsc2UKMTcuIGZhbHNlCjE4LiB0cnVlCjE5LiB0cnVlCg==
+```
 
 [1]: https://github.com/coreutils/coreutils/blob/master/src/test.c "test source code from coreutils"

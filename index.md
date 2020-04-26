@@ -11,5 +11,6 @@ learn something new!
 ## Latest posts
 
 {% for post in site.posts %}
-### [{{ post.title }}]({{ post.url | relative_url }})
+### [_{{ post.title }}: {{ post.short }}_]({{ post.url | relative_url }})
+* {{ post.date }}
 {% endfor %}

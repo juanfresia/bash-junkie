@@ -1,6 +1,7 @@
 ---
 layout: post
 title: 'Bash conditionals'
+short: "Trying to make sense of them"
 date: '2020-04-23 23:25:00 -0300'
 ---
 

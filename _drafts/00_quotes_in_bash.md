@@ -1,20 +1,27 @@
 ---
-layout: default
+layout: post
+title: 'Quoting in bash'
+short: "To quote or not to quote"
+date: '2020-04-23 23:25:00 -0300'
 ---
 
 # Quoting variables in bash
-
-> `bash --version`: GNU bash, version 4.3.48(1)-release (x86_64-pc-linux-gnu)
-
-Your name?: Linux ubuntu-xenial 4.4.0-164-generic #192-Ubuntu SMP Fri Sep 13
-12:02:50 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
-
-Arcana check DC: 15
-
-Recommended doses of coffee:
+`bash --version`: GNU bash, version 4.3.48(1)-release (x86_64-pc-linux-gnu)  
+`INT (Arcana)`: DC 15  
+`QOTD`:  
+> We will see how to deal with those cases, its all a matter of quoting.  
+> _Bash Junkie, 2019_
 
 Bash variables can be tricky, their behaviour is not the same as variables in
 other programming languages (the ones we are most likely to be familiar with).
+When you ask bash to recall the value of a variable, some weird things may happen,
+if you are not careful.
+
+Say we want to count 
+
+```bash:
+
+```
 
 To start with, their contents are always strings, no matter what. Defining a
 variable in a shell or a script is easy, we just use the assignment operator: `=`.

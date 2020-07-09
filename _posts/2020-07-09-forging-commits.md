@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 'Git crimes: forgery'
+title: 'Git crimes - forgery'
 short: "An odd view of git internals"
 date: '2020-07-09 19:12:00 -0300'
 ---

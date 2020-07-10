@@ -9,8 +9,8 @@ date: '2020-07-09 19:12:00 -0300'
 `git --version`: git version 2.17.1  
 `INT (Arcana)`: DC 20  
 `QOTD`:  
-> Again, normally you’d never actually do this by hand.  
-> _[Documentation of git core](https://git-scm.com/docs/gitcore-tutorial)_
+> "Again, normally you’d never actually do this by hand."  
+> -- _[Documentation of git core](https://git-scm.com/docs/gitcore-tutorial)_
 
 Oh, you don't know me...
 

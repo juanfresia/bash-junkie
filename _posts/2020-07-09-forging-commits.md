@@ -19,7 +19,7 @@ has been in contact with code professionally has most likely used it, or at
 least seen it. It really does the job, and its quite simple to use once the
 basic concepts are understood.
 
-Many would also have noticed the `.git` directory, an unmistakable sing for a
+Many would also have noticed the `.git` directory, an unmistakable sign for a
 git repository. That's the place where git stores all the actual data (and
 metadata) of your repositories.
 

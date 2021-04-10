@@ -3,6 +3,8 @@ description: >
   Short posts on bash scripting.
   Because there is always something more to learn.
 
-markdown: kramdown
+markdown: redcarpet2
+redcarpet:
+    extensions: ["strikethrough"]
 theme: minima
 

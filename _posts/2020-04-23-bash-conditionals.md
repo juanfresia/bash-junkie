@@ -93,8 +93,8 @@ first time I saw it. But then later on you see that replacing the double
 brackets with simple brackets also works. Less characters, brilliant!
 
 ```bash
-if [ $foo == "1" ]; then echo hi; fi
-fi
+$ if [ $foo == "1" ]; then echo hi; fi
+hi
 ```
 
 Then you see some people doing the same thing you do, exactly the same...
@@ -102,8 +102,8 @@ except that for some reason they changed the `==` for a `-eq`. Weird right? I
 mean, that it also works. So many ways to do the same thing.
 
 ```bash
-if [ $foo -eq "1" ]; then echo hi; fi
-fi
+$ if [ $foo -eq "1" ]; then echo hi; fi
+hi
 ```
 
 At that point its all good, until you stumble upon other "formats" of bash
